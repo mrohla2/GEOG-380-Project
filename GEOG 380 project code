@@ -4,6 +4,9 @@ from arcpy import env
 env.workspace = r"C:\Users\Melanie Rohla\Downloads\NOLA"
 env.overwriteOutput = True
 
+# Make it a tool (Tutorial 2-6)
+
+
 # Select construction that are 'planned' as opposed to 'complete'
 proj = "Dept_of_Public_Works_Roadwork_Projects.shp"
 
@@ -19,5 +22,3 @@ proj = "Dept_of_Public_Works_Roadwork_Projects.shp"
 
 # Create an excel sheet with those parcels
 
-
-# Make it a tool?? (Tutorial 2-6)
