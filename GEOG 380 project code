@@ -1,9 +1,11 @@
 # Set up environment
 import arcpy
 from arcpy import env
-env.workspace = r"C:
+env.workspace = r"C:\Users\Melanie Rohla\Downloads\NOLA"
+env.overwriteOutput = True
 
 # Select construction that are 'planned' as opposed to 'complete'
+proj = "Dept_of_Public_Works_Roadwork_Projects.shp"
 
 
 # Separate planned construction by start year
