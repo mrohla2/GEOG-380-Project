@@ -1,3 +1,21 @@
+# Set up environment
 import arcpy
 from arcpy import env
 env.workspace = r"C:
+
+# Select construction that are 'planned' as opposed to 'complete'
+
+
+# Separate planned construction by start year
+
+
+# Make buffers around each planned construction
+
+
+# Find parcels that intersect those buffers
+
+
+# Create an excel sheet with those parcels
+
+
+# Make it a tool?? (Tutorial 2-6)
