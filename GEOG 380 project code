@@ -4,21 +4,23 @@ from arcpy import env
 env.workspace = r"C:\Users\Melanie Rohla\Downloads\NOLA"
 env.overwriteOutput = True
 
-# Make it a tool (Tutorial 2-6)
-
+# Make it a tool (Tutorial 2-6) THIS IS WHAT'S LEFT
+year = arcpy.GetParameterAsText(0)
 
 # Select construction that are 'planned' as opposed to 'complete'
 proj = "Dept_of_Public_Works_Roadwork_Projects.shp"
-
+arcpy.Select_analysis(proj, "projplanned", '"Current_Ph" = \'Planned\'')
 
 # Separate planned construction by start year
-
+year = raw_input("Enter the year: ") # THOUGH YOU WON'T NEED THIS WHEN IT'S A TOOL
+where_clause = '"StartQtr" LIKE '%2020%'' # ISSUE!!
+arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
 
 # Make buffers around each planned construction
-
+arcpy.Buffer_analysis("projplannedyear", "projbufferyear", "100 Feet")
 
 # Find parcels that intersect those buffers
-
+arcpy.Intersect_analysis(["parcels", "projbufferyear"], "parcelintersect")
 
 # Create an excel sheet with those parcels
-
+arcpy.TableToExcel_conversion("parcelintersect", "impactedparcelsyear.xls")
