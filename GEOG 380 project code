@@ -1,26 +1,45 @@
-# Set up environment
 import arcpy
 from arcpy import env
-env.workspace = r"C:\Users\Melanie Rohla\Downloads\NOLA"
+
+## In the tool, user will be prompted to enter these parameters
+workspace = arcpy.GetParameterAsText(0)
+inputconstr = arcpy.GetParameterAsText(1)
+inputparc = arcpy.GetParameterAsText(2)
+year = arcpy.GetParameterAsText(3)
+
+env.workspace = workspace
 env.overwriteOutput = True
 
-# Make it a tool (Tutorial 2-6) THIS IS WHAT'S LEFT
-year = arcpy.GetParameterAsText(0)
-
-# Select construction that are 'planned' as opposed to 'complete'
-proj = "Dept_of_Public_Works_Roadwork_Projects.shp"
+## Selects construction projects that are 'Planned' instead of 'Complete' or 'In Progress'
+proj = inputconstr
 arcpy.Select_analysis(proj, "projplanned", '"Current_Ph" = \'Planned\'')
 
-# Separate planned construction by start year
-year = raw_input("Enter the year: ") # THOUGH YOU WON'T NEED THIS WHEN IT'S A TOOL
-where_clause = '"StartQtr" LIKE '%2020%'' # ISSUE!!
-arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
+## Adds "YEAR" field to Construction layer and calculates field based on when the project will start
+arcpy.AddField_management("projplanned.shp", "YEAR", "TEXT")
+arcpy.CalculateField_management("projplanned.shp", "YEAR", '!StartQtr![8:]', "PYTHON")
 
-# Make buffers around each planned construction
-arcpy.Buffer_analysis("projplannedyear", "projbufferyear", "100 Feet")
+## Selects the construction projects based on the user-inputed year
+if year == "2019":
+    where_clause = '"YEAR" = \'2019\''
+    arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
+elif year == "2020":
+    where_clause = '"YEAR" = \'2020\''
+    arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
+elif year == "2021":
+    where_clause = '"YEAR" = \'2021\''
+    arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
+else:
+    where_clause = '"YEAR" = \'2022\''
+    arcpy.Select_analysis("projplanned.shp", "projplannedyear", where_clause)
 
-# Find parcels that intersect those buffers
-arcpy.Intersect_analysis(["parcels", "projbufferyear"], "parcelintersect")
+## Creates a 50-foot buffer around each planned construction projects
+arcpy.Buffer_analysis("projplannedyear.shp", "projbufferyear", "50 Feet")
 
-# Create an excel sheet with those parcels
-arcpy.TableToExcel_conversion("parcelintersect", "impactedparcelsyear.xls")
+## Finds parcels that intersect with that buffer (i.e. the parcels impacted by construction)
+parc = inputparc
+arcpy.MakeFeatureLayer_management(parc, "tempparc")
+arcpy.SelectLayerByLocation_management("tempparc", 'INTERSECT', "projbufferyear.shp")
+arcpy.CopyFeatures_management("tempparc", "impactedparcels")
+
+## Creates an Excel sheet listing those impacted parcels
+arcpy.TableToExcel_conversion("impactedparcels.shp", "impactedparcelsyear.xls")
